@@ -49,12 +49,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   Widget buildGallery3D() {
     return Gallery3D(
-        itemCount: imageUrlList.length,
+        autoLoop: true,
+        itemCount: 5,
         width: MediaQuery.of(context).size.width,
         height: 300,
         isClip: false,
 
-        // ellipseHeight: 80,
+        // ellipseHeight:s 80,
         itemConfig: GalleryItemConfig(
           width: 220,
           height: 300,
