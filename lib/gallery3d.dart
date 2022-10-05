@@ -55,6 +55,7 @@ class _Gallery3DState extends State<Gallery3D>
 
   ///生命周期状态,
   AppLifecycleState appLifecycleState = AppLifecycleState.resumed;
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     appLifecycleState = state;
@@ -62,6 +63,7 @@ class _Gallery3DState extends State<Gallery3D>
   }
 
   final int _minAnimMilliseconds = 200;
+
   int _getAnimMilliseconds(int milliseconds) {
     if (milliseconds < _minAnimMilliseconds) {
       return _minAnimMilliseconds;
@@ -224,6 +226,7 @@ class _Gallery3DState extends State<Gallery3D>
     int angle = transformInfo.angle;
     double scale = transformInfo.scale;
     Offset offset = transformInfo.offset;
+    double rotate = transformInfo.rotate;
 
     int offsetAngle = (offsetDx.abs() / _perimeter * 360).round();
     if (offsetDx > 0) {
@@ -239,10 +242,13 @@ class _Gallery3DState extends State<Gallery3D>
     ///计算缩放参数
     scale = calculateScale(angle);
 
+    rotate = getRotate(angle);
+
     _galleryItemTransformInfoList[index]
       ..angle = angle
       ..scale = scale
-      ..offset = offset;
+      ..offset = offset
+      ..rotate = rotate;
   }
 
   Widget _buildWidgetList() {
@@ -350,6 +356,20 @@ class _Gallery3DState extends State<Gallery3D>
     return nextIndex;
   }
 
+  double getRotate(int angle) {
+    var tempScale = angle / 180.0;
+    var ga = 0.0;
+    if (angle < 180 + _unitAngle / 2) {
+      ga = 45 - (45 * tempScale);
+    } else if (tempScale > 2) {
+      ga = 0.0;
+    } else if (angle > 180 - _unitAngle / 2) {
+      ga = 360 - (360 * tempScale * 0.01) - 10;
+      print('ga $ga');
+    }
+    return ga * pi / 180;
+  }
+
   void _initGalleryTransformInfoMap() {
     _galleryItemTransformInfoList.clear();
     for (var i = 0; i < widget.itemCount; i++) {
@@ -423,12 +443,15 @@ class _GalleryItemTransformInfo {
   double scale;
   int angle;
   int index;
+  double rotate;
 
-  _GalleryItemTransformInfo(
-      {required this.index,
-      this.scale = 1,
-      this.angle = 0,
-      this.offset = Offset.zero});
+  _GalleryItemTransformInfo({
+    required this.index,
+    this.scale = 1,
+    this.angle = 0,
+    this.offset = Offset.zero,
+    this.rotate = 0.0,
+  });
 }
 
 class GalleryItem extends StatelessWidget {
@@ -492,12 +515,15 @@ class GalleryItem extends StatelessWidget {
         height: config.height,
         child: Transform.scale(
           scale: transformInfo.scale,
-          child: InkWell(
-            highlightColor: Colors.transparent,
-            splashColor: Colors.transparent,
-            onTap: () => onClick?.call(index),
-            child: _buildShadowItem(
-                _buildRadiusItem(_buildMaskTransformItem(_buildItem(context)))),
+          child: Transform.rotate(
+            angle: transformInfo.rotate,
+            child: InkWell(
+              highlightColor: Colors.transparent,
+              splashColor: Colors.transparent,
+              onTap: () => onClick?.call(index),
+              child: _buildShadowItem(_buildRadiusItem(
+                  _buildMaskTransformItem(_buildItem(context)))),
+            ),
           ),
         ),
       ),
