@@ -1,3 +1,9 @@
+## [1.0.7] - 20221006
+remove some logs
+## [1.0.6] - 20221006
+fix card not rotate when init state
+## [1.0.5] - 20221005
+added curve scroll
 ## [1.0.4] - 20220216
 fixed some bug
 ## [1.0.3] - 20220215

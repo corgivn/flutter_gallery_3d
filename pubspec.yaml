@@ -1,8 +1,7 @@
-name: flutter_gallery_3d
+name: gallery_3d
 description: 3d gallery
-version: 1.0.4
-author: leeorz
-homepage: https://github.com/lazyee/flutter_gallery_3d
+version: 1.0.7
+homepage: https://github.com/corgivn/flutter_gallery_3d
 
 environment:
   sdk: ">=2.12.0 <3.0.0"

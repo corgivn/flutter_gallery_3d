@@ -365,7 +365,6 @@ class _Gallery3DState extends State<Gallery3D>
       ga = 0.0;
     } else if (angle > 180 - _unitAngle / 2) {
       ga = 360 - (360 * tempScale * 0.01) - 10;
-      print('ga $ga');
     }
     return ga * pi / 180;
   }
