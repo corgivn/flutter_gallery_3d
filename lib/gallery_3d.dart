@@ -378,7 +378,9 @@ class _Gallery3DState extends State<Gallery3D>
           index: i,
           angle: itemAngle,
           scale: calculateScale(itemAngle),
-          offset: calculateOffset(itemAngle)));
+          offset: calculateOffset(itemAngle),
+          rotate: getRotate(itemAngle),
+      ));
     }
   }
 
