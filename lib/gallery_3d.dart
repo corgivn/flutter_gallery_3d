@@ -14,6 +14,7 @@ class Gallery3D extends StatefulWidget {
   final int currentIndex;
   final IndexedWidgetBuilder itemBuilder;
   final ValueChanged<int>? onItemChanged;
+  final ValueChanged<int>? onActivePage;
   final ValueChanged<int>? onClickItem;
   final double ellipseHeight; //椭圆轨迹高度
   final bool isClip;
@@ -26,6 +27,7 @@ class Gallery3D extends StatefulWidget {
       this.currentIndex = 0,
       this.onClickItem,
       this.onItemChanged,
+      this.onActivePage,
       this.ellipseHeight = 0,
       this.isClip = true,
       this.height,
@@ -332,6 +334,7 @@ class _Gallery3DState extends State<Gallery3D>
 
         Future.delayed(Duration.zero, () {
           widget.onItemChanged?.call(_currentIndex);
+          widget.onActivePage?.call(item.index);
         });
       }
       _updateWidgetIndexOnStack();
@@ -373,13 +376,15 @@ class _Gallery3DState extends State<Gallery3D>
     _galleryItemTransformInfoList.clear();
     for (var i = 0; i < widget.itemCount; i++) {
       var itemAngle = getFinalAngle(180 + _unitAngle * i);
-      _galleryItemTransformInfoList.add(_GalleryItemTransformInfo(
-          index: i,
+      _galleryItemTransformInfoList.add(
+        _GalleryItemTransformInfo(
+          index: i == 0 ? 0 : widget.itemCount - i,
           angle: itemAngle,
           scale: calculateScale(itemAngle),
           offset: calculateOffset(itemAngle),
           rotate: getRotate(itemAngle),
-      ));
+        ),
+      );
     }
   }
 
@@ -430,9 +435,7 @@ class _Gallery3DState extends State<Gallery3D>
       builder: widget.itemBuilder,
       config: widget.itemConfig,
       onClick: (index) {
-        if (widget.onClickItem != null && index == _currentIndex) {
-          widget.onClickItem?.call(index);
-        }
+        widget.onClickItem?.call(index);
       },
       transformInfo: _galleryItemTransformInfoList[index],
     );

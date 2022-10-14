@@ -73,6 +73,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             this.currentIndex = index;
           });
         },
+        onActivePage: (index) {
+          print ('onActivePage $index');
+        },
         onClickItem: (index) => print("currentIndex:$index"),
         itemBuilder: (context, index) {
           return Image.network(
