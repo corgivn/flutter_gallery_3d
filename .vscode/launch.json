@@ -5,12 +5,12 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "flutter_gallery_3d",
+            "name": "gallery_3d",
             "request": "launch",
             "type": "dart"
         },
         {
-            "name": "flutter_gallery_3d (profile mode)",
+            "name": "gallery_3d (profile mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"

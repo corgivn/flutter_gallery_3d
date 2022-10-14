@@ -55,18 +55,18 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_gallery_3d:
-    dependency: "direct main"
-    description:
-      path: ".."
-      relative: true
-    source: path
-    version: "1.0.5"
   flutter_test:
     dependency: "direct dev"
     description: flutter
     source: sdk
     version: "0.0.0"
+  gallery_3d:
+    dependency: "direct main"
+    description:
+      path: ".."
+      relative: true
+    source: path
+    version: "1.0.7"
   matcher:
     dependency: transitive
     description:

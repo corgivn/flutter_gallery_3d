@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gallery_3d/gallery_3d.dart';
+import 'package:gallery_3d/gallery_3d.dart';
 
 void main() {
   runApp(MyApp());
@@ -49,8 +49,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   Widget buildGallery3D() {
     return Gallery3D(
-        autoLoop: true,
-        itemCount: 5,
+        autoLoop: false,
+        itemCount: 3,
         width: MediaQuery.of(context).size.width,
         height: 300,
         isClip: false,
@@ -68,6 +68,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         ),
         currentIndex: currentIndex,
         onItemChanged: (index) {
+          print ('index $index');
           setState(() {
             this.currentIndex = index;
           });
