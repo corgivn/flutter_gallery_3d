@@ -1,3 +1,5 @@
+## [1.0.8] - 20221006
+support left to right page indicator
 ## [1.0.7] - 20221006
 remove some logs
 ## [1.0.6] - 20221006
