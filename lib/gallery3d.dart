@@ -4,7 +4,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 class Gallery3D extends StatefulWidget {
-  final int itemCount;
+  int itemCount;
+  int actualItemCount = 0;
   final GalleryItemConfig itemConfig;
   final double? height;
   final double width;
@@ -18,23 +19,24 @@ class Gallery3D extends StatefulWidget {
   final double ellipseHeight; //椭圆轨迹高度
   final bool isClip;
 
-  Gallery3D(
-      {Key? key,
-      this.autoLoop = true,
-      this.delayTime = 5000,
-      this.scrollTime = 1000,
-      this.currentIndex = 0,
-      this.onClickItem,
-      this.onItemChanged,
-      this.ellipseHeight = 0,
-      this.isClip = true,
-      this.height,
-      required this.width,
-      required this.itemConfig,
-      required this.itemCount,
-      required this.itemBuilder})
-      : assert(itemCount >= 3, 'ItemCount must be greater than or equal to 3'),
-        super(key: key);
+  Gallery3D({Key? key,
+    this.autoLoop = true,
+    this.delayTime = 5000,
+    this.scrollTime = 1000,
+    this.currentIndex = 0,
+    this.onClickItem,
+    this.onItemChanged,
+    this.ellipseHeight = 0,
+    this.isClip = true,
+    this.height,
+    required this.width,
+    required this.itemConfig,
+    required this.itemCount,
+    required this.itemBuilder})
+      : super(key: key) {
+    actualItemCount = itemCount;
+    itemCount = itemCount < 3 ? 3 : itemCount;
+  }
 
   @override
   _Gallery3DState createState() => _Gallery3DState();
@@ -142,7 +144,9 @@ class _Gallery3DState extends State<Gallery3D>
           _isTouching = true;
           _panDownLocation = details.localPosition;
           _lastUpdateLocation = details.localPosition;
-          _lastTouchMillisecond = DateTime.now().millisecondsSinceEpoch;
+          _lastTouchMillisecond = DateTime
+              .now()
+              .millisecondsSinceEpoch;
         },
         //抬起
         onPanEnd: (details) {
@@ -156,7 +160,9 @@ class _Gallery3DState extends State<Gallery3D>
         onPanUpdate: (details) {
           setState(() {
             _lastUpdateLocation = details.localPosition;
-            _lastTouchMillisecond = DateTime.now().millisecondsSinceEpoch;
+            _lastTouchMillisecond = DateTime
+                .now()
+                .millisecondsSinceEpoch;
             _updateAllGalleryItemTransform(details.delta.dx);
           });
         },
@@ -216,7 +222,7 @@ class _Gallery3DState extends State<Gallery3D>
   ///更新偏移数据
   void updateTransform(int index, double offsetDx) {
     _GalleryItemTransformInfo transformInfo =
-        _galleryItemTransformInfoList[index];
+    _galleryItemTransformInfoList[index];
     // if (offsetDx == 0) return;
     // 需要计算出当前位移对应的夹角,再进行计算对应的x轴坐标点
     if (_perimeter == 0) {
@@ -235,7 +241,28 @@ class _Gallery3DState extends State<Gallery3D>
       angle += offsetAngle;
     }
     angle = getFinalAngle(angle);
-
+    if (widget.actualItemCount == 1 && (angle < 90 || angle > 300)) {
+      if (angle < 60) {
+        angle = 60;
+      } else if (angle >= 294) {
+        angle = 294;
+      } else
+        angle = getFinalAngle(angle);
+    } else if (widget.actualItemCount == 2) {
+      if (index == 0 && angle < 60) {
+        angle = 60;
+      } else if (index == 0 && angle >= 180) {
+        angle = 180;
+      } else
+        angle = getFinalAngle(angle);
+      if (index == 1 && angle < 180) {
+        angle = 180;
+      } else if (index == 1 && angle >= 294) {
+        angle = 294;
+      } else
+        angle = getFinalAngle(angle);
+    } else
+      angle = getFinalAngle(angle);
     //计算椭圆轨迹的点
     offset = calculateOffset(angle);
 
@@ -255,8 +282,8 @@ class _Gallery3DState extends State<Gallery3D>
     if (widget.isClip) {
       return ClipRect(
           child: Stack(
-        children: _galleryItemWidgetList,
-      ));
+            children: _galleryItemWidgetList,
+          ));
     }
     return Stack(
       children: _galleryItemWidgetList,
@@ -284,7 +311,10 @@ class _Gallery3DState extends State<Gallery3D>
     var offsetX = _lastUpdateLocation!.dx - _panDownLocation!.dx;
     //当偏移量超过屏幕的10%宽度的时候且手指按下时候的索引和手指抬起来时候的索引一样的时候
     if (_panDownIndex == _currentIndex &&
-        offsetX.abs() > MediaQuery.of(context).size.width * 0.1) {
+        offsetX.abs() > MediaQuery
+            .of(context)
+            .size
+            .width * 0.1) {
       if (offsetX > 0) {
         target = (angle - 180 + _unitAngle) / 360 * _perimeter;
       } else {
@@ -331,7 +361,16 @@ class _Gallery3DState extends State<Gallery3D>
         _currentIndex = i;
 
         Future.delayed(Duration.zero, () {
-          widget.onItemChanged?.call(_currentIndex);
+          int curr = _currentIndex;
+          if (widget.actualItemCount == 0 || widget.actualItemCount == 1) {
+            curr = 0;
+          } else if (widget.actualItemCount == 2) {
+            if (_currentIndex == 2) {
+              curr = _currentIndex - 1;
+            } else
+              curr = _currentIndex;
+          }
+          widget.onItemChanged?.call(curr);
         });
       }
       _updateWidgetIndexOnStack();
@@ -365,7 +404,6 @@ class _Gallery3DState extends State<Gallery3D>
       ga = 0.0;
     } else if (angle > 180 - _unitAngle / 2) {
       ga = 360 - (360 * tempScale * 0.01) - 10;
-      print('ga $ga');
     }
     return ga * pi / 180;
   }
@@ -429,11 +467,13 @@ class _Gallery3DState extends State<Gallery3D>
       builder: widget.itemBuilder,
       config: widget.itemConfig,
       onClick: (index) {
-        if (widget.onClickItem != null && index == _currentIndex) {
+        if (widget.onClickItem != null && index == _currentIndex &&
+            index < widget.actualItemCount) {
           widget.onClickItem?.call(index);
         }
       },
       transformInfo: _galleryItemTransformInfoList[index],
+      shouldRenderEmptySizeBox: index >= widget.actualItemCount,
     );
   }
 }
@@ -458,6 +498,7 @@ class GalleryItem extends StatelessWidget {
   final GalleryItemConfig config;
   final double ellipseHeight;
   final int index;
+  final bool shouldRenderEmptySizeBox;
   final IndexedWidgetBuilder builder;
   final ValueChanged<int>? onClick;
   final _GalleryItemTransformInfo transformInfo;
@@ -469,6 +510,7 @@ class GalleryItem extends StatelessWidget {
     required this.transformInfo,
     required this.config,
     required this.builder,
+    required this.shouldRenderEmptySizeBox,
     this.minScale = 0.8,
     this.onClick,
     this.ellipseHeight = 0,
@@ -514,7 +556,7 @@ class GalleryItem extends StatelessWidget {
         width: config.width,
         height: config.height,
         child: Transform.scale(
-          scale: transformInfo.scale,
+          scale: shouldRenderEmptySizeBox ? 0 : transformInfo.scale,
           child: Transform.rotate(
             angle: transformInfo.rotate,
             child: InkWell(
@@ -539,10 +581,9 @@ class GalleryItemConfig {
   final List<BoxShadow> shadows; //控制item的阴影
   final bool isShowTransformMask; //是否显示item的透明度蒙层的渐变
 
-  const GalleryItemConfig(
-      {this.width = 220,
-      this.height = 300,
-      this.radius = 0,
-      this.isShowTransformMask = true,
-      this.shadows = const []});
+  const GalleryItemConfig({this.width = 220,
+    this.height = 300,
+    this.radius = 0,
+    this.isShowTransformMask = true,
+    this.shadows = const []});
 }
