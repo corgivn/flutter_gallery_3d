@@ -1,3 +1,6 @@
+## [1.0.9] - 20230202
+fix: limit 3 items
+feat: limit ios 11
 ## [1.0.8] - 20221006
 support left to right page indicator
 ## [1.0.7] - 20221006
