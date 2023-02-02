@@ -3,8 +3,10 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+//ignore: must_be_immutable
 class Gallery3D extends StatefulWidget {
-  final int itemCount;
+  int itemCount;
+  int actualItemCount;
   final GalleryItemConfig itemConfig;
   final double? height;
   final double width;
@@ -25,18 +27,21 @@ class Gallery3D extends StatefulWidget {
       this.delayTime = 5000,
       this.scrollTime = 1000,
       this.currentIndex = 0,
+      this.onActivePage,
       this.onClickItem,
       this.onItemChanged,
-      this.onActivePage,
       this.ellipseHeight = 0,
       this.isClip = true,
       this.height,
+      this.actualItemCount = 0,
       required this.width,
       required this.itemConfig,
       required this.itemCount,
       required this.itemBuilder})
-      : assert(itemCount >= 3, 'ItemCount must be greater than or equal to 3'),
-        super(key: key);
+      : super(key: key) {
+    actualItemCount = itemCount;
+    itemCount = itemCount < 3 ? 3 : itemCount;
+  }
 
   @override
   _Gallery3DState createState() => _Gallery3DState();
@@ -110,14 +115,14 @@ class _Gallery3DState extends State<Gallery3D>
       });
     }
 
-    WidgetsBinding.instance?.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
 
     super.initState();
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance?.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
     _timer = null;
     _timerAnimationController?.stop(canceled: true);
@@ -237,7 +242,28 @@ class _Gallery3DState extends State<Gallery3D>
       angle += offsetAngle;
     }
     angle = getFinalAngle(angle);
-
+    if (widget.actualItemCount == 1 && (angle < 90 || angle > 300)) {
+      if (angle < 60) {
+        angle = 60;
+      } else if (angle >= 294) {
+        angle = 294;
+      } else
+        angle = getFinalAngle(angle);
+    } else if (widget.actualItemCount == 2) {
+      if (index == 0 && angle < 60) {
+        angle = 60;
+      } else if (index == 0 && angle >= 180) {
+        angle = 180;
+      } else
+        angle = getFinalAngle(angle);
+      if (index == 1 && angle < 180) {
+        angle = 180;
+      } else if (index == 1 && angle >= 294) {
+        angle = 294;
+      } else
+        angle = getFinalAngle(angle);
+    } else
+      angle = getFinalAngle(angle);
     //计算椭圆轨迹的点
     offset = calculateOffset(angle);
 
@@ -333,7 +359,16 @@ class _Gallery3DState extends State<Gallery3D>
         _currentIndex = i;
 
         Future.delayed(Duration.zero, () {
-          widget.onItemChanged?.call(_currentIndex);
+          int curr = _currentIndex;
+          if (widget.actualItemCount == 0 || widget.actualItemCount == 1) {
+            curr = 0;
+          } else if (widget.actualItemCount == 2) {
+            if (_currentIndex == 2) {
+              curr = _currentIndex - 1;
+            } else
+              curr = _currentIndex;
+          }
+          widget.onItemChanged?.call(curr);
           widget.onActivePage?.call(item.index);
         });
       }
@@ -435,9 +470,14 @@ class _Gallery3DState extends State<Gallery3D>
       builder: widget.itemBuilder,
       config: widget.itemConfig,
       onClick: (index) {
-        widget.onClickItem?.call(index);
+        if (widget.onClickItem != null &&
+            index == _currentIndex &&
+            index < widget.actualItemCount) {
+          widget.onClickItem?.call(index);
+        }
       },
       transformInfo: _galleryItemTransformInfoList[index],
+      shouldRenderEmptySizeBox: index >= widget.actualItemCount,
     );
   }
 }
@@ -462,6 +502,7 @@ class GalleryItem extends StatelessWidget {
   final GalleryItemConfig config;
   final double ellipseHeight;
   final int index;
+  final bool shouldRenderEmptySizeBox;
   final IndexedWidgetBuilder builder;
   final ValueChanged<int>? onClick;
   final _GalleryItemTransformInfo transformInfo;
@@ -473,6 +514,7 @@ class GalleryItem extends StatelessWidget {
     required this.transformInfo,
     required this.config,
     required this.builder,
+    required this.shouldRenderEmptySizeBox,
     this.minScale = 0.8,
     this.onClick,
     this.ellipseHeight = 0,
@@ -518,7 +560,7 @@ class GalleryItem extends StatelessWidget {
         width: config.width,
         height: config.height,
         child: Transform.scale(
-          scale: transformInfo.scale,
+          scale: shouldRenderEmptySizeBox ? 0 : transformInfo.scale,
           child: Transform.rotate(
             angle: transformInfo.rotate,
             child: InkWell(
