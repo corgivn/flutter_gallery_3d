@@ -40,7 +40,7 @@ class Gallery3D extends StatefulWidget {
       required this.itemBuilder})
       : super(key: key) {
     actualItemCount = itemCount;
-    itemCount = itemCount < 3 ? 3 : itemCount;
+    itemCount = itemCount < 3 && itemCount >= 1 ? 3 : itemCount;
   }
 
   @override
@@ -464,8 +464,14 @@ class _Gallery3DState extends State<Gallery3D>
   }
 
   GalleryItem _buildGalleryItem(int index) {
+    int idx = index;
+    if (widget.actualItemCount == 0 || widget.actualItemCount == 1) {
+      idx = 0;
+    } else if (widget.actualItemCount == 2) {
+      idx = index - 1 < 0 ? 0 : index;
+    }
     return GalleryItem(
-      index: index,
+      index: idx,
       ellipseHeight: widget.ellipseHeight,
       builder: widget.itemBuilder,
       config: widget.itemConfig,
