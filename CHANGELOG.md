@@ -1,3 +1,5 @@
+## [1.0.10] - 20230203
+bug fix
 ## [1.0.9] - 20230202
 fix: limit 3 items
 feat: limit ios 11
