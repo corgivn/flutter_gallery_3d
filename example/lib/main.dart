@@ -50,7 +50,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   Widget buildGallery3D() {
     return Gallery3D(
         autoLoop: false,
-        itemCount: 0,
+        itemCount: 3,
         width: MediaQuery.of(context).size.width,
         height: 300,
         isClip: false,
@@ -73,11 +73,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           });
         },
         onActivePage: (index) {
-          // print('onActivePage $index');
+          print('onActivePage $index');
         },
         onClickItem: (index) => print("currentIndex:$index"),
         itemBuilder: (context, index) {
-          print('index $index');
           return Image.network(
             imageUrlList[index],
             fit: BoxFit.fill,

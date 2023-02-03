@@ -242,24 +242,20 @@ class _Gallery3DState extends State<Gallery3D>
       angle += offsetAngle;
     }
     angle = getFinalAngle(angle);
-    if (widget.actualItemCount == 1 && (angle < 90 || angle > 300)) {
-      if (angle < 60) {
-        angle = 60;
-      } else if (angle >= 294) {
-        angle = 294;
-      } else
-        angle = getFinalAngle(angle);
+    if (widget.actualItemCount == 1) {
+      angle = 180;
     } else if (widget.actualItemCount == 2) {
       if (index == 0 && angle < 60) {
         angle = 60;
-      } else if (index == 0 && angle >= 180) {
+      } else if (index == 0 && angle > 180) {
         angle = 180;
-      } else
+      } else {
         angle = getFinalAngle(angle);
+      }
       if (index == 1 && angle < 180) {
         angle = 180;
-      } else if (index == 1 && angle >= 294) {
-        angle = 294;
+      } else if (index == 1 && angle > 300) {
+        angle = 300;
       } else
         angle = getFinalAngle(angle);
     } else
@@ -359,21 +355,42 @@ class _Gallery3DState extends State<Gallery3D>
         _currentIndex = i;
 
         Future.delayed(Duration.zero, () {
-          int curr = _currentIndex;
-          if (widget.actualItemCount == 0 || widget.actualItemCount == 1) {
-            curr = 0;
-          } else if (widget.actualItemCount == 2) {
-            if (_currentIndex == 2) {
-              curr = _currentIndex - 1;
-            } else
-              curr = _currentIndex;
+          int idx = getCurIdx(item, i);
+          int at = getActiveIdx(item, i);
+          if (idx != -1) {
+            print('idx $idx');
+            print('at $at');
+            widget.onItemChanged?.call(idx);
+            // widget.onActivePage?.call(widget.actualItemCount - idx);
           }
-          widget.onItemChanged?.call(curr);
-          widget.onActivePage?.call(item.index);
         });
       }
       _updateWidgetIndexOnStack();
     }
+  }
+
+  int getCurIdx(_GalleryItemTransformInfo item, int i) {
+    bool isCenter =
+        item.angle > 180 - _unitAngle / 2 && item.angle < 180 + _unitAngle / 2;
+    if (widget.actualItemCount == 0) return -1;
+    if (widget.actualItemCount == 1 && isCenter) return 0;
+    if (widget.actualItemCount == 2) {
+      if (i == 0 && isCenter) return 0;
+      if (i == 1 && isCenter) return 1;
+    }
+    return i < widget.actualItemCount ? i : -1;
+  }
+
+  int getActiveIdx(_GalleryItemTransformInfo item, int i) {
+    bool isCenter =
+        item.angle > 180 - _unitAngle / 2 && item.angle < 180 + _unitAngle / 2;
+    if (widget.actualItemCount == 0) return -1;
+    if (widget.actualItemCount == 1 && isCenter) return 0;
+    if (widget.actualItemCount == 2) {
+      if (i == 0 && isCenter) return 0;
+      if (i == 1 && isCenter) return 1;
+    }
+    return item.index;
   }
 
   ///获取传入index的上一个index
@@ -530,7 +547,9 @@ class GalleryItem extends StatelessWidget {
     return Container(
         width: config.width,
         height: config.height,
-        child: builder(context, index));
+        child: shouldRenderEmptySizeBox
+            ? const SizedBox()
+            : builder(context, index));
   }
 
   Widget _buildMaskTransformItem(Widget child) {
