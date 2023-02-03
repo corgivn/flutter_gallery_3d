@@ -358,10 +358,8 @@ class _Gallery3DState extends State<Gallery3D>
           int idx = getCurIdx(item, i);
           int at = getActiveIdx(item, i);
           if (idx != -1) {
-            print('idx $idx');
-            print('at $at');
             widget.onItemChanged?.call(idx);
-            // widget.onActivePage?.call(widget.actualItemCount - idx);
+            widget.onActivePage?.call(at);
           }
         });
       }
